@@ -138,6 +138,17 @@ define U-Boot/rockpro64-rk3399
   ATF:=rk3399_bl31.elf
 endef
 
+define U-Boot/rock-pi-e-rk3328
+  BUILD_SUBTARGET:=armv8
+  NAME:=Rock Pi E
+  BUILD_DEVICES:= \
+    radxa_rock-pi-e
+  DEPENDS:=+PACKAGE_u-boot-rock-pi-e-rk3328:arm-trusted-firmware-rockchip
+  PKG_BUILD_DEPENDS:=arm-trusted-firmware-rockchip
+  ATF:=rk3328_bl31.elf
+  OF_PLATDATA:=$(1)
+endef
+
 UBOOT_TARGETS := \
   doornet2-rk3399 \
   guangmiao-g4c-rk3399 \
@@ -148,7 +159,8 @@ UBOOT_TARGETS := \
   nanopi-r2c-rk3328 \
   nanopi-r2s-rk3328 \
   orangepi-r1-plus-rk3328 \
-  orangepi-r1-plus-lts-rk3328
+  orangepi-r1-plus-lts-rk3328  \
+  rock-pi-e-rk3328
 
 UBOOT_CONFIGURE_VARS += USE_PRIVATE_LIBGCC=yes
 
