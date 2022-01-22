@@ -1,0 +1,34 @@
+#! /bin/sh
+#http://weather.yahoo.com/2146704
+#The location parameter needs to be a WOEID. 
+#To find your WOEID, browse or search for your city from the Weather home page. 
+#The WOEID is in the URL for the forecast page for that city. You can also get 
+#the WOEID by entering your zip code on the home page. For example, if you search 
+#for Los Angeles on the Weather home page, the forecast page for that city is 
+#http://weather.yahoo.com/united-states/california/los-angeles-2146704/. 
+#The WOEID is 2146704.
+#changping2151334
+#beijing 2151330
+
+wget -O /tmp/weather 'http://xml.weather.yahoo.com/forecastrss?w=2166473&u=c'
+if [ $? = 0 ]; then
+        cat /tmp/weather | grep '<yweather' | awk -F'"' 'BEGIN {C1=1;}{ \
+                {if (substr($1, 11, 8)=="location") L1=$2} \
+                {if (substr($1, 11, 4)=="wind") {L81=$2; L82=$4; L83=$6}} \
+                {if (substr($1, 11, 10)=="atmosphere") { L91=$2; L92=$4; L93=$6; \
+                {if($8=="0") L94="S"} {if($8=="1") L94="R"} {if($8=="2") L94="F"}}} \
+                {if (substr($1, 11, 9)=="astronomy") {LA1=$2; LA2=$4}} \
+                {if (substr($1, 11, 9)=="condition") {L2=$4; L3=$6"c"}} \
+                {if (substr($1, 11, 8)=="forecast") {if (C1==1) {L4=$12;L5=$6"cdu"$8"c";C1=0} else {L6=$12;L7=$6"cdu"$8"c"}}}} \
+                END \
+                { while (length(L3) < 4) {L3="n"L3}; while (length(L5) < 10) {L5="n"L5}; while (length(L7) < 10) {L7="n"L7}; \
+                i=index(LA1,":");Xss=substr(LA1,0,i) substr(LA1, i+1, 2); \
+                i=index(LA2,":");Xse=substr(LA2,0,i) substr(LA2, i+1, 2);  \
+                printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\nLv.%s Dir.%s\042 %skm/h\nH.%s%% %skm %smb %s\nRise %s Set %s\n%s\n%s\n", \
+                L1,L2,L3,L4,L5,L6,L7,L81,L82,L83,L91,L92,L93,L94,LA1,LA2,Xss,Xse}' \
+                > /root/data/weather
+else
+         exit $?
+fi
+
+exit 0
