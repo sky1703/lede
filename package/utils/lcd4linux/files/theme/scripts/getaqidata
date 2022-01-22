@@ -1,0 +1,120 @@
+#! /bin/sh
+
+#北京的分类污染物24小时数据获取并计算出AQI和相应颜色数据写入到指定文件中供显示和绘图；
+
+set -e;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=PM2.5" -O /tmp/apm2.5;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=PM10" -O /tmp/apm10;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=SO2" -O /tmp/aso2;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=NO2" -O /tmp/ano2;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=O3" -O /tmp/ao3;
+wget "http://zx.bjmemc.com.cn/ashx/Data.ashx?Action=GetChartData_ByStationAndWRWType&StationName=%E5%A5%A5%E4%BD%93%E4%B8%AD%E5%BF%83&WRWType=CO" -O /tmp/aco;
+
+cat /tmp/apm2.5 | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "pm25;"}{printf $2";"}' > /tmp/aqi;
+echo "" >> /tmp/aqi;
+cat /tmp/apm10 | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "pm10;"}{printf $2";"}' >> /tmp/aqi;
+echo "" >> /tmp/aqi;
+cat /tmp/aso2 | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "so2;"}{printf $2";"}' >> /tmp/aqi;
+echo "" >> /tmp/aqi;
+cat /tmp/ano2 | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "no2;"}{printf $2";"}' >> /tmp/aqi;
+echo "" >> /tmp/aqi;
+cat /tmp/ao3 | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "o3;"}{printf $2";"}' >> /tmp/aqi;
+echo "" >> /tmp/aqi;
+cat /tmp/aco | awk -F "{" '{for (i=3;i<=NF;i++) print $i}' | awk -F '"Value"' '{print $2}' | awk -F '"' 'BEGIN{printf "co;"}{printf $2";"}' >> /tmp/aqi;
+echo "" >> /tmp/aqi;
+
+cat /tmp/aqi| awk -F";" '{for (i=2;i<=NF;i++) \
+{ \
+  {if (NR==1) AQIpm25[i-2]=$i+0}  \
+  {if (NR==2) AQIpm10[i-2]=$i+0}  \
+  {if (NR==3) AQIso2[i-2]=$i+0}  \
+  {if (NR==4) AQIno2[i-2]=$i+0}  \
+  {if (NR==5) AQIo3[i-2]=$i+0}  \
+  {if (NR==6) AQIco[i-2]=$i+0}}  \
+ } END { \
+  {if (AQIpm25[23]==0) AQIpm25[23]=AQIpm25[22]} \
+  {if (AQIpm10[23]==0) AQIpm10[23]=AQIpm10[22]} \
+  {if (AQIso2[23]==0) AQIso2[23]=AQIso2[22]} \
+  {if (AQIo3[23]==0) AQIo3[23]=AQIo3[22]} \
+  {if (AQIno2[23]==0) AQIno2[23]=AQIno2[22]} \
+  {if (AQIco[23]==0) AQIco[23]=AQIco[22]} \
+  {for (i=0;i<=23;i++) { \
+    pm25BPl=500;pm25BPh=1000;iAqil=500;iAqih=1000; \
+    if (AQIpm25[i]<35) {pm25BPl=0;pm25BPh=35;iAqil=0;iAqih=50;} \
+    else if (AQIpm25[i]<75) {pm25BPl=35;pm25BPh=75;iAqil=50;iAqih=100;} \
+    else if (AQIpm25[i]<115) {pm25BPl=75;pm25BPh=115;iAqil=100;iAqih=150;} \
+    else if (AQIpm25[i]<150) {pm25BPl=115;pm25BPh=150;iAqil=150;iAqih=200;} \
+    else if (AQIpm25[i]<250) {pm25BPl=150;pm25BPh=250;iAqil=200;iAqih=300;} \
+    else if (AQIpm25[i]<350) {pm25BPl=250;pm25BPh=350;iAqil=300;iAqih=400;} \
+    else if (AQIpm25[i]<500) {pm25BPl=350;pm25BPh=500;iAqil=400;iAqih=500;}; \
+    AQIpm25[i] = iAqil+(AQIpm25[i]-pm25BPl)*((iAqih-iAqil)/(pm25BPh-pm25BPl));\
+    pm10BPl=600;pm10BPh=1000;iAqil=500;iAqih=1000; \
+    if (AQIpm10[i]<50) {pm10BPl=0;pm10BPh=50;iAqil=0;iAqih=50;} \
+    else if (AQIpm10[i]<150) {pm10BPl=50;pm10BPh=150;iAqil=50;iAqih=100;} \
+    else if (AQIpm10[i]<250) {pm10BPl=150;pm10BPh=250;iAqil=100;iAqih=150;} \
+    else if (AQIpm10[i]<350) {pm10BPl=250;pm10BPh=350;iAqil=150;iAqih=200;} \
+    else if (AQIpm10[i]<420) {pm10BPl=350;pm10BPh=420;iAqil=200;iAqih=300;} \
+    else if (AQIpm10[i]<500) {pm10BPl=420;pm10BPh=500;iAqil=300;iAqih=400;} \
+    else if (AQIpm10[i]<600) {pm10BPl=500;pm10BPh=600;iAqil=400;iAqih=500;}; \
+    AQIpm10[i] = iAqil+(AQIpm10[i]-pm10BPl)*((iAqih-iAqil)/(pm10BPh-pm10BPl));\
+    so2BPl=2620;so2BPh=4000;iAqil=500;iAqih=1000; \
+    if (AQIso2[i]<50) {so2BPl=0;so2BPh=50;iAqil=0;iAqih=50;} \
+    else if (AQIso2[i]<150) {so2BPl=50;so2BPh=150;iAqil=50;iAqih=100;} \
+    else if (AQIso2[i]<475) {so2BPl=150;so2BPh=475;iAqil=100;iAqih=150;} \
+    else if (AQIso2[i]<800) {so2BPl=475;so2BPh=800;iAqil=150;iAqih=200;} \
+    else if (AQIso2[i]<1600) {so2BPl=800;so2BPh=1600;iAqil=200;iAqih=300;} \
+    else if (AQIso2[i]<2100) {so2BPl=1600;so2BPh=2100;iAqil=300;iAqih=400;} \
+    else if (AQIso2[i]<2620) {so2BPl=2100;so2BPh=2620;iAqil=400;iAqih=500;}; \
+    AQIso2[i] = iAqil+(AQIso2[i]-so2BPl)*((iAqih-iAqil)/(so2BPh-so2BPl));\
+    no2BPl=940;no2BPh=1500;iAqil=500;iAqih=1000; \
+    if (AQIno2[i]<40) {no2BPl=0;no2BPh=40;iAqil=0;iAqih=50;} \
+    else if (AQIno2[i]<80) {no2BPl=40;no2BPh=80;iAqil=50;iAqih=100;} \
+    else if (AQIno2[i]<180) {no2BPl=80;no2BPh=180;iAqil=100;iAqih=150;} \
+    else if (AQIno2[i]<280) {no2BPl=180;no2BPh=280;iAqil=150;iAqih=200;} \
+    else if (AQIno2[i]<565) {no2BPl=280;no2BPh=565;iAqil=200;iAqih=300;} \
+    else if (AQIno2[i]<750) {no2BPl=565;no2BPh=750;iAqil=300;iAqih=400;} \
+    else if (AQIno2[i]<940) {no2BPl=750;no2BPh=940;iAqil=400;iAqih=500;}; \
+    AQIno2[i] = iAqil+(AQIno2[i]-no2BPl)*((iAqih-iAqil)/(no2BPh-no2BPl));\
+    o3BPl=1200;o3BPh=2000;iAqil=500;iAqih=1000; \
+    if (AQIo3[i]<100) {o3BPl=0;o3BPh=100;iAqil=0;iAqih=50;} \
+    else if (AQIo3[i]<160) {o3BPl=100;o3BPh=160;iAqil=50;iAqih=100;} \
+    else if (AQIo3[i]<215) {o3BPl=160;o3BPh=215;iAqil=100;iAqih=150;} \
+    else if (AQIo3[i]<265) {o3BPl=215;o3BPh=265;iAqil=150;iAqih=200;} \
+    else if (AQIo3[i]<800) {o3BPl=265;o3BPh=800;iAqil=200;iAqih=300;} \
+    else if (AQIo3[i]<1000) {o3BPl=800;o3BPh=1000;iAqil=300;iAqih=400;} \
+    else if (AQIo3[i]<1200) {o3BPl=1000;o3BPh=1200;iAqil=400;iAqih=500;}; \
+    AQIo3[i] = iAqil+(AQIo3[i]-o3BPl)*((iAqih-iAqil)/(o3BPh-o3BPl));\
+    coBPl=60;coBPh=100;iAqil=500;iAqih=1000; \
+    if (AQIco[i]<2) {coBPl=0;coBPh=100;iAqil=0;iAqih=50;} \
+    else if (AQIco[i]<4) {coBPl=2;coBPh=4;iAqil=50;iAqih=100;} \
+    else if (AQIco[i]<14) {coBPl=4;coBPh=14;iAqil=100;iAqih=150;} \
+    else if (AQIco[i]<24) {coBPl=14;coBPh=24;iAqil=150;iAqih=200;} \
+    else if (AQIco[i]<36) {coBPl=24;coBPh=36;iAqil=200;iAqih=300;} \
+    else if (AQIco[i]<48) {coBPl=36;coBPh=48;iAqil=300;iAqih=400;} \
+    else if (AQIco[i]<60) {coBPl=48;coBPh=60;iAqil=400;iAqih=500;}; \
+    AQIco[i] = iAqil+(AQIco[i]-coBPl)*((iAqih-iAqil)/(coBPh-coBPl));\
+    sMain="pm25";cAQI=AQIpm25[i];\
+    if (cAQI<AQIpm10[i]) {sMain="pm10";cAQI=AQIpm10[i];}; \
+    if (cAQI<AQIso2[i]) {sMain="so2";cAQI=AQIso2[i];}; \
+    if (cAQI<AQIno2[i]) {sMain="no2";cAQI=AQIno2[i];}; \
+    if (cAQI<AQIo3[i]) {sMain="o3";cAQI=AQIo3[i];}; \
+    if (cAQI<AQIco[i]) {sMain="co";cAQI=AQIco[i];}; \
+    cAqi[i]=cAQI;cR=0;cG=0;cB=0;cAqi[i]=cAqi[i]+0;\
+    if (cAQI<50) {aLevel=1;cR=255/50*cAQI;cG=228+(255-228)/50*cAQI;cB=0} \
+    else if (cAQI<100) {aLevel=2;cR=255;cG=255-(255-126)/50*(cAQI-50);cB=0} \
+    else if (cAQI<150) {aLevel=3;cR=255;cG=126-126/50*(cAQI-100);cB=0} \
+    else if (cAQI<200) {aLevel=4;cR=255-(255-153)/50*(cAQI-150);cG=0;cB=76/100*(cAQI-150)} \
+    else if (cAQI<300) {aLevel=5;cR=153-(153-126)/100*(cAQI-200);cG=0;cB=76-(76-35)/100*(cAQI-200)} \
+    else {aLevel=6;cR=126-(126-90)/300*(cAQI-300);cG=0;cB=35-(35-15)/300*(cAQI-300)}; \
+    rColor[i]=cR;gColor[i]=cG;bColor[i]=cB;\
+    } \
+  } \
+{aAqi=sprintf("%d",cAQI); while (length(aAqi) < 3) {aAqi="n"aAqi}; \
+  printf "%s\n%s\n%d\n",sMain,aAqi,aLevel; \
+  for (i=0;i<=23;i++) printf "%d\n",cAqi[i]; \
+  for (i=0;i<=23;i++) printf "%d,%d,%d,\n",rColor[i],gColor[i],bColor[i]; } \
+}' >/mnt/lcd4linux/data/aqi;
+
+python /mnt/lcd4linux/scripts/drawchart.py;
+
+exit 0;
