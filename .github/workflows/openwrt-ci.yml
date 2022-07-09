@@ -54,6 +54,12 @@ jobs:
           ./scripts/feeds install -a
           ./scripts/feeds install -a  
 
+      - name: Install feeds
+        continue-on-error: true
+        run: |
+          ./scripts/feeds install -a
+          ./scripts/feeds install -a  
+
       - name: Generate configuration file
         run: |
           make defconfig
