@@ -48,6 +48,7 @@ jobs:
           df -h
 
       - name: Update feeds
+        continue-on-error: true
         run: |
           ./scripts/feeds update -a
           ./scripts/feeds install -a
