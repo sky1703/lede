@@ -12,6 +12,9 @@ on:
     - cron: 0 20 * * *
   release:
     types: [published]
+  push:
+    branches:    
+      - rockpi-e
 
 jobs:
 
@@ -28,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: rockpi-e
 
       - name: Space cleanup
         env:
@@ -46,12 +49,15 @@ jobs:
 
       - name: Update feeds
         run: |
-          sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          ./scripts/feeds install -a  
 
       - name: Generate configuration file
-        run: make defconfig
+        run: |
+          make defconfig
+          cp def_config/X86-linkease.config .config
+          make defconfig
 
       - name: Make download
         run: |
