@@ -308,6 +308,8 @@ define KernelPackage/ath11k
   +kmod-qcom-qmi-helpers +kmod-crypto-michael-mic +ATH11K_THERMAL:kmod-hwmon-core \
   +ATH11K_THERMAL:kmod-thermal
   FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath11k/ath11k.ko
+  AUTOLOAD:=$(call AutoProbe,ath11k)
+  MODPARAMS.ath11k:=frame_mode=2
 endef
 
 define KernelPackage/ath11k/description
@@ -344,7 +346,7 @@ define KernelPackage/ath11k-ahb
   $(call KernelPackage/mac80211/Default)
   TITLE:=Qualcomm 802.11ax AHB wireless chipset support
   URL:=https://wireless.wiki.kernel.org/en/users/drivers/ath11k
-  DEPENDS+= @TARGET_ipq807x +kmod-ath11k +LINUX_5_15:kmod-qrtr-smd
+  DEPENDS+= @(TARGET_ipq60xx||TARGET_ipq807x) +kmod-ath11k +LINUX_5_15:kmod-qrtr-smd
   FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath11k/ath11k_ahb.ko
   AUTOLOAD:=$(call AutoProbe,ath11k_ahb)
 endef
