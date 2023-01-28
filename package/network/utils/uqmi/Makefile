@@ -13,8 +13,6 @@ PKG_MAINTAINER:=Matti Laakso <malaakso@elisanet.fi>
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=
 
-PKG_BUILD_PARALLEL:=1
-
 PKG_FLAGS:=nonshared
 
 include $(INCLUDE_DIR)/package.mk
@@ -34,7 +32,11 @@ define Package/uqmi/description
 endef
 
 TARGET_CFLAGS += \
-	-I$(STAGING_DIR)/usr/include -ffunction-sections -fdata-sections
+	-I$(STAGING_DIR)/usr/include \
+	-ffunction-sections \
+	-fdata-sections \
+	-Wno-error=dangling-pointer \
+	-Wno-error=maybe-uninitialized
 
 TARGET_LDFLAGS += -Wl,--gc-sections
 
