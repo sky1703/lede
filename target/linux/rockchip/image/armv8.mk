@@ -221,17 +221,6 @@ define Device/radxa_rock-pi-e
 endef
 TARGET_DEVICES += radxa_rock-pi-e
 
-define Device/radxa_rock-pi-e25
-  DEVICE_VENDOR := Radxa
-  DEVICE_MODEL := ROCK Pi E25
-  SOC := rk3568
-  SUPPORTED_DEVICES := radxa,rockpi-e25
-  UBOOT_DEVICE_NAME := rock-pi-e25-rk3568
-  IMAGE/sysupgrade.img.gz := boot-common | boot-script nanopi-r5s | pine64-img | gzip | append-metadata
-  DEVICE_PACKAGES := kmod-r8125
-endef
-TARGET_DEVICES += radxa_rock-pi-e25
-
 define Device/rongpin_king3399
   DEVICE_VENDOR := Rongpin
   DEVICE_MODEL := King3399
