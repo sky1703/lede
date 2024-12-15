@@ -16,7 +16,8 @@ alfa-network,ac1200rm|\
 alfa-network,awusfree1|\
 alfa-network,quad-e4g|\
 alfa-network,r36m-e4g|\
-alfa-network,tube-e4g)
+alfa-network,tube-e4g|\
+huasifei,mt7621dtu)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x1000" "0x1000"
 	;;
 allnet,all0256n-4m|\
@@ -42,15 +43,17 @@ zbtlink,zbt-wg2626|\
 zte,mf283plus)
 	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x1000" "0x10000"
 	;;
+h3c,tx1800-plus|\
+h3c,tx1801-plus|\
+h3c,tx1806|\
+jcg,q20)
+	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x20000"
+	;;
 hootoo,ht-tm05|\
 ravpower,rp-wd03)
 	idx="$(find_mtd_index u-boot-env)"
 	[ -n "$idx" ] && \
 		ubootenv_add_uci_config "/dev/mtd$idx" "0x4000" "0x1000" "0x1000"
-	;;
-c-life,xg1|\
-jcg,q20)
-	ubootenv_add_uci_config "/dev/mtd1" "0x0" "0x20000" "0x20000"
 	;;
 linksys,ea7300-v1|\
 linksys,ea7500-v2|\
